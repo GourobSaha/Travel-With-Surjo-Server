@@ -19,7 +19,7 @@ async function run() {
 
         app.get('/services', async (req, res) => {
             const size = parseInt(req.query.size);
-            console.log(size);
+            // console.log(size);
             const query = {};
             const cursor = serviceCollection.find(query).limit(size).sort({ _id: -1 });
             const services = await cursor.toArray();
@@ -47,7 +47,7 @@ async function run() {
             };
             const cursor = reviewCollection.find(query).sort({ date: -1 });
             const reviews = await cursor.toArray();
-            console.log(query)
+            // console.log(query)
             res.send(reviews);
         });
 
@@ -62,6 +62,40 @@ async function run() {
         app.post('/reviews', async (req, res) => {
             const reviews = req.body;
             const result = await reviewCollection.insertOne(reviews);
+            res.send(result);
+        });
+
+        app.delete("/reviews/:id", async (req, res) => {
+            const id = req.params.id;
+            // console.log(id);
+            const query = { _id: ObjectId(id) };
+            const result = await reviewCollection.deleteOne(query);
+            res.send(result);
+        });
+
+        app.get("/reviews/:id", async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { _id: ObjectId(id) };
+            const result = await reviewCollection.findOne(query);
+            res.send(result);
+            console.log(result);
+        });
+
+        //update
+        app.put("/reviews/:id", async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const reviews = req.body;
+            const option = { upsert: true };
+            const date = new Date();
+            const updatedReview = {
+                $set: {
+                    date: reviews.date,
+                    review: reviews.review,
+                },
+            };
+            const result = await reviewCollection.updateOne(filter, updatedReview, option);
             res.send(result);
         });
     }
