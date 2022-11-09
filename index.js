@@ -18,8 +18,10 @@ async function run() {
         const reviewCollection = client.db('travelMore').collection('reviews');
 
         app.get('/services', async (req, res) => {
+            const size = parseInt(req.query.size);
+            console.log(size);
             const query = {};
-            const cursor = serviceCollection.find(query);
+            const cursor = serviceCollection.find(query).limit(size).sort({ _id: -1 });
             const services = await cursor.toArray();
             res.send(services);
         });
@@ -37,11 +39,18 @@ async function run() {
                 query = {
                     service_id: req.query.service_id,
                 };
-            }
+            };
+            if (req.query.email) {
+                query = {
+                    email: req.query.email,
+                };
+            };
             const cursor = reviewCollection.find(query).sort({ date: -1 });
             const reviews = await cursor.toArray();
+            console.log(query)
             res.send(reviews);
         });
+
 
         //Insert Services
         app.post('/services', async (req, res) => {
